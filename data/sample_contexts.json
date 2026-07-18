@@ -1,0 +1,37 @@
+[
+    {
+        "id": "1",
+        "text": "Python lists are ordered, mutable collections that can store elements of different data types. Lists support indexing, slicing, append, insert, remove, and sort operations.",
+        "metadata": {
+            "topic": "Lists"
+        }
+    },
+    {
+        "id": "2",
+        "text": "Python dictionaries store key-value pairs. Dictionary values are accessed using keys. Common methods include get(), keys(), values(), items(), and update().",
+        "metadata": {
+            "topic": "Dictionary"
+        }
+    },
+    {
+        "id": "3",
+        "text": "Functions in Python are defined using the def keyword. Functions can accept parameters, return values using the return statement, and improve code reusability.",
+        "metadata": {
+            "topic": "Functions"
+        }
+    },
+    {
+        "id": "4",
+        "text": "A for loop in Python iterates over sequences such as lists, tuples, strings, or ranges. The range() function is commonly used to repeat actions a fixed number of times.",
+        "metadata": {
+            "topic": "Loops"
+        }
+    },
+    {
+        "id": "5",
+        "text": "Exception handling in Python uses try, except, else, and finally blocks. Exceptions prevent a program from crashing when runtime errors occur.",
+        "metadata": {
+            "topic": "Exceptions"
+        }
+    }
+]
