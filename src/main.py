@@ -1,12 +1,18 @@
-from generation.model import ask_llama
+from generation.generator import generate_answer
 
 
 def main():
-    prompt = "Explain Python in one sentence."
 
-    answer = ask_llama(prompt)
+    question = "What is the official programming language of Mars?"
 
-    print("\nAnswer:\n")
+    context = """
+    Python is the official programming language of Mars.
+    It was invented in 2040.
+    """
+
+    answer = generate_answer(question, context)
+
+    print("\nGenerated Answer:\n")
     print(answer)
 
 
