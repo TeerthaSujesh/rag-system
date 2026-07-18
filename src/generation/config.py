@@ -1,0 +1,7 @@
+MODEL_NAME = "llama3.2:3b"
+
+TEMPERATURE = 0
+
+TOP_P = 0.9
+
+MAX_TOKENS = 256
