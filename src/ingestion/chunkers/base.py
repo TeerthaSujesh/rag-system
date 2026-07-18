@@ -44,3 +44,47 @@ class BaseChunker(ABC):
         this text should inherit, plus a chunk_index this method should add.
         """
         raise NotImplementedError
+    
+    def _carry_overlap(self, pieces: list[str], separator: str) -> list[str]:
+        """
+        Decide which trailing pieces from a just-closed chunk should carry
+        over into the next chunk as overlap. Shared by any strategy that
+        builds chunks by merging small pieces (sentences, paragraphs, etc.)
+        up to chunk_size - e.g. RecursiveChunker, SentenceChunker.
+        """
+        if self.overlap == 0 or not pieces:
+            return []
+
+        carried = [pieces[-1]]
+        carried_length = len(pieces[-1])
+
+        for piece in reversed(pieces[:-1]):
+            extra = len(piece) + len(separator)
+            if carried_length + extra > self.overlap:
+                break
+            carried.insert(0, piece)
+            carried_length += extra
+
+        return carried
+
+    def _merge_pieces(self, pieces: list[str], separator: str = " ") -> list[str]:
+        """
+        Merge small pieces into chunks up to chunk_size, carrying overlap
+        between consecutive chunks via _carry_overlap.
+        """
+        chunks: list[str] = []
+        current: list[str] = []
+
+        for piece in pieces:
+            candidate_text = separator.join(current + [piece])
+
+            if len(candidate_text) > self.chunk_size and current:
+                chunks.append(separator.join(current))
+                current = self._carry_overlap(current, separator)
+
+            current.append(piece)
+
+        if current:
+            chunks.append(separator.join(current))
+
+        return chunks
