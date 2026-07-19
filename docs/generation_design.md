@@ -172,3 +172,5 @@ Possible future enhancements include:
 - Multiple prompt selection strategies
 - Support for additional language models
 - Evaluation metrics such as Exact Match and Hallucination Rate
+- Whether hierarchical chunking is worth the added complexity given time constraints.
+- Sliding window chunking is not implemented as a separate strategy: it's the same algorithm as fixed-size chunking with overlap > 0 (see FixedSizeChunker's docstring). Comparison results for "fixed-size" in task 1 cover both cases by varying overlap.

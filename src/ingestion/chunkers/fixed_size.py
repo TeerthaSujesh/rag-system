@@ -4,7 +4,17 @@ Fixed-size chunking strategy.
 Splits text into chunks of a fixed character length, advancing by
 (chunk_size - overlap) each step, as shown in the sliding-window diagram.
 """
+"""
+Fixed-size chunking strategy.
 
+Splits text into chunks of a fixed character length, advancing by
+(chunk_size - overlap) each step, as shown in the sliding-window diagram.
+
+Note: "sliding window chunking" is the same algorithm as fixed-size
+chunking with overlap > 0 - there's no separate technique, so we don't
+have a dedicated SlidingWindowChunker file. Set overlap=0 here to get
+naive fixed-size behavior, or overlap>0 for the sliding-window variant.
+"""
 from .base import BaseChunker, Chunk
 
 
