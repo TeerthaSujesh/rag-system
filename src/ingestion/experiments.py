@@ -1,11 +1,12 @@
 """
-Experiment harness for tasks 2, 3, and the strategy comparison (task 1).
+Experiment harness for tasks 2, 3, and the strategy comparison (task 1),
+plus the embedding model comparison (task 7).
 
 Uses a small labeled test set (question -> expected source PDF) to measure
 retrieval accuracy, alongside indexing time and chunk-size stats, across
-different chunk_size/overlap/strategy configurations. Runs against
-isolated, temporary ChromaDB collections so it never touches your real
-knowledge_base collection.
+different chunk_size/overlap/strategy/embedding_model configurations. Runs
+against isolated, temporary ChromaDB collections so it never touches your
+real knowledge_base collection.
 """
 
 import time
@@ -34,14 +35,20 @@ TEST_QUESTIONS = [
 ]
 
 
-def run_experiment(chunker_factory, label: str) -> dict:
+def run_experiment(chunker_factory, label: str, embedding_model: str | None = None) -> dict:
     """
     chunker_factory: a zero-arg function returning a fresh chunker instance
     (fresh, since some chunkers may hold state across calls).
     label: a name for this run, used as the temp collection name.
+    embedding_model: key into config.EMBEDDING_MODELS (e.g. "all-minilm",
+    "bge-small"). Defaults to config.EMBEDDING_MODEL (nomic-embed-text)
+    when omitted, matching all prior behavior.
     """
     client = chromadb.PersistentClient(path=str(config.CHROMA_PERSIST_DIR))
-    collection_name = f"exp_{label}"
+    # Include the embedding model in the collection name so runs across
+    # different models (task 7) never collide, even if run back to back.
+    model_suffix = embedding_model or config.EMBEDDING_MODEL
+    collection_name = f"exp_{label}_{model_suffix}"
     try:
         client.delete_collection(collection_name)
     except Exception:
@@ -60,7 +67,7 @@ def run_experiment(chunker_factory, label: str) -> dict:
             all_chunks.extend(chunker.chunk(page["text"], base_meta))
 
     if all_chunks:
-        embeddings = [embed_document(c.text) for c in all_chunks]
+        embeddings = [embed_document(c.text, model=embedding_model) for c in all_chunks]
         ids = [f"{label}_{i}" for i in range(len(all_chunks))]
         metadatas = [
             {k: v for k, v in c.metadata.items() if v is not None} for c in all_chunks
@@ -76,7 +83,7 @@ def run_experiment(chunker_factory, label: str) -> dict:
     correct_at_1 = 0
     correct_at_3 = 0
     for question, expected_source, expected_keyword in TEST_QUESTIONS:
-        q_embedding = embed_query(question)
+        q_embedding = embed_query(question, model=embedding_model)
         results = collection.query(query_embeddings=[q_embedding], n_results=3)
         docs = results["documents"][0]
         sources = [m.get("source") for m in results["metadatas"][0]]
