@@ -37,3 +37,15 @@ class FixedSizeChunker(BaseChunker):
             start += step
 
         return chunks
+    
+    def chunk(self, text: str, base_metadata: dict) -> list[Chunk]:
+        step = self.chunk_size - self.overlap
+        texts = []
+        start = 0
+
+        while start < len(text):
+            end = start + self.chunk_size
+            texts.append(text[start:end])
+            start += step
+
+        return self._build_chunks(texts, base_metadata)

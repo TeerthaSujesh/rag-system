@@ -27,3 +27,8 @@ class SentenceChunker(BaseChunker):
             chunks.append(Chunk(text=chunk_text, metadata=metadata))
 
         return chunks
+    
+    def chunk(self, text: str, base_metadata: dict) -> list[Chunk]:
+        pieces = self._split_sentences(text)
+        merged_texts = self._merge_pieces(pieces)
+        return self._build_chunks(merged_texts, base_metadata)

@@ -88,3 +88,16 @@ class BaseChunker(ABC):
             chunks.append(separator.join(current))
 
         return chunks
+    
+    def _build_chunks(self, texts: list[str], base_metadata: dict) -> list[Chunk]:
+        """
+        Wrap a list of chunk texts into Chunk objects, each with its own
+        independent metadata copy and a chunk_index. Shared by every
+        strategy's chunk() method as the final step.
+        """
+        chunks = []
+        for i, text in enumerate(texts):
+            metadata = dict(base_metadata)
+            metadata["chunk_index"] = i
+            chunks.append(Chunk(text=text, metadata=metadata))
+        return chunks

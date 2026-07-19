@@ -68,3 +68,19 @@ class SemanticChunker(BaseChunker):
             chunks.append(Chunk(text=chunk_text, metadata=metadata))
 
         return chunks
+    
+
+    def chunk(self, text: str, base_metadata: dict) -> list[Chunk]:
+        sentences = sent_tokenize(text)
+
+        if len(sentences) <= 1:
+            topic_groups = [sentences] if sentences else []
+        else:
+            breakpoints = self._find_breakpoints(sentences)
+            topic_groups = self._group_sentences_by_breakpoints(sentences, breakpoints)
+
+        merged_texts = []
+        for group in topic_groups:
+            merged_texts.extend(self._merge_pieces(group))
+
+        return self._build_chunks(merged_texts, base_metadata)

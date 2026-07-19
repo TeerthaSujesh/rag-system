@@ -95,3 +95,7 @@ class RecursiveChunker(BaseChunker):
 
         return chunks
     
+    def chunk(self, text: str, base_metadata: dict) -> list[Chunk]:
+        pieces = self._split_text(text, self.SEPARATORS)
+        merged_texts = self._merge_pieces(pieces)
+        return self._build_chunks(merged_texts, base_metadata)
