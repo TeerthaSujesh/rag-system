@@ -36,3 +36,12 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     norm_a = math.sqrt(sum(x * x for x in a))
     norm_b = math.sqrt(sum(y * y for y in b))
     return dot / (norm_a * norm_b)
+
+def embed_document(text: str) -> list[float]:
+    """Embed text for STORAGE - use when adding chunks to ChromaDB."""
+    return embed_text("search_document: " + text)
+
+
+def embed_query(text: str) -> list[float]:
+    """Embed text for QUERYING - use when embedding a user's question."""
+    return embed_text("search_query: " + text)
