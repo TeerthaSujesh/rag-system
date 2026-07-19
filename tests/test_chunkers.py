@@ -5,6 +5,9 @@ Tests for src/ingestion/chunkers/*.
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+import pytest
+from ingestion.chunkers.semantic import SemanticChunker
+from ingestion.embeddings import embed_text
 
 from ingestion.chunkers.fixed_size import FixedSizeChunker
 from ingestion.chunkers.recursive import RecursiveChunker
@@ -121,3 +124,49 @@ def test_sentence_metadata_is_independent_per_chunk():
 
     chunks[0].metadata["chunk_index"] = 999
     assert chunks[1].metadata["chunk_index"] != 999
+
+def _ollama_available() -> bool:
+    try:
+        embed_text("test")
+        return True
+    except Exception:
+        return False
+
+
+requires_ollama = pytest.mark.skipif(
+    not _ollama_available(), reason="Ollama not running or model not pulled"
+)
+
+
+@requires_ollama
+def test_semantic_splits_on_topic_shift():
+    text = (
+        "Force equals mass times acceleration, written as F=ma. "
+        "This relationship was first described by Newton in his second law. "
+        "A heavier object requires more force to achieve the same acceleration. "
+        "Meanwhile, in an unrelated topic, photosynthesis converts sunlight into chemical energy. "
+        "Plants use chlorophyll to absorb light for this process. "
+        "The byproduct of photosynthesis is oxygen, released into the atmosphere."
+    )
+    chunker = SemanticChunker(chunk_size=500, overlap=0, breakpoint_percentile=80)
+    chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
+
+    assert len(chunks) == 2
+    assert "F=ma" in chunks[0].text
+    assert "photosynthesis" in chunks[1].text
+    assert "photosynthesis" not in chunks[0].text
+    assert "F=ma" not in chunks[1].text
+
+
+@requires_ollama
+def test_semantic_metadata_is_independent_per_chunk():
+    text = (
+        "Topic one sentence A. Topic one sentence B. Topic one sentence C. "
+        "Completely different topic sentence A. Completely different topic sentence B."
+    )
+    chunker = SemanticChunker(chunk_size=200, overlap=0, breakpoint_percentile=70)
+    chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
+
+    if len(chunks) > 1:
+        chunks[0].metadata["chunk_index"] = 999
+        assert chunks[1].metadata["chunk_index"] != 999
