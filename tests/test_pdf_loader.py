@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
 from ingestion.pdf_loader import load_pdf_pages, load_pdf_with_metadata
 from ingestion import config
 
@@ -33,3 +32,10 @@ def test_load_pdf_with_metadata_source_is_filename():
     pages = load_pdf_with_metadata(pdf_path)
 
     assert all(p["source"] == "HR_Policy.pdf" for p in pages)
+
+def test_control_characters_are_stripped():
+    text_with_control_char = "Casual Leave: \x7f short-notice leave"
+    from ingestion.pdf_loader import _clean_text
+    cleaned = _clean_text(text_with_control_char)
+    assert "\x7f" not in cleaned
+    assert "Casual Leave" in cleaned

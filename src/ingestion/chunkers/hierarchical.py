@@ -1,14 +1,15 @@
 """
 Hierarchical chunking strategy.
 
-Detects chapter and section headings via regex, builds a two-level
-structure (chapter -> section -> content), then delegates actual
-size-bound chunking of each section's text to a RecursiveChunker.
-Every resulting chunk carries chapter/section metadata.
+Detects section headings via a title-case heuristic (short lines, most
+words capitalized, no ending punctuation - matches how these documents
+are actually formatted, since they don't use numbered chapters/sections).
+Delegates actual size-bound chunking of each section's content to a
+RecursiveChunker. Every resulting chunk carries section metadata.
 
 Falls back gracefully when no headings are found: documents without
-detectable chapter/section structure are treated as one flat section,
-chunked normally - same output as RecursiveChunker alone.
+detectable structure are treated as one flat section, chunked normally -
+same output as RecursiveChunker alone.
 """
 
 import re
@@ -18,19 +19,18 @@ from .recursive import RecursiveChunker
 
 
 class HierarchicalChunker(BaseChunker):
-    CHAPTER_PATTERN = re.compile(r"^chapter\s+\d+[:.]?\s*.*$", re.MULTILINE | re.IGNORECASE)
-    SECTION_PATTERN = re.compile(r"^\d+\.\d+\s+.+$", re.MULTILINE)
+    _CONNECTORS = r"and|of|the|in|for|to|a|an|or|with"
+    _WORD = rf"(?:[A-Z][A-Za-z0-9&/'-]*|(?:{_CONNECTORS}))"
+    SECTION_PATTERN = re.compile(
+        rf"^[A-Z][A-Za-z0-9&/'-]*(?:[ \t]{_WORD}){{0,5}}$",
+        re.MULTILINE,
+    )
 
     def __init__(self, chunk_size: int, overlap: int = 0):
         super().__init__(chunk_size, overlap)
         self._inner_chunker = RecursiveChunker(chunk_size, overlap)
 
     def _split_by_pattern(self, text: str, pattern: re.Pattern) -> list[tuple[str | None, str]]:
-        """
-        Split text at every heading matching `pattern`. Returns a list of
-        (heading_text_or_None, content_after_heading) pairs. If no heading
-        is found at all, returns [(None, text)] - the fallback case.
-        """
         matches = list(pattern.finditer(text))
         if not matches:
             return [(None, text)]
@@ -48,29 +48,22 @@ class HierarchicalChunker(BaseChunker):
             blocks.append((heading, text[start:end].strip()))
 
         return blocks
-    
+
     def chunk(self, text: str, base_metadata: dict) -> list[Chunk]:
-        chapters = self._split_by_pattern(text, self.CHAPTER_PATTERN)
+        sections = self._split_by_pattern(text, self.SECTION_PATTERN)
 
         all_chunks: list[Chunk] = []
-        for chapter_heading, chapter_text in chapters:
-            sections = self._split_by_pattern(chapter_text, self.SECTION_PATTERN)
+        for section_heading, section_text in sections:
+            if not section_text.strip():
+                continue
 
-            for section_heading, section_text in sections:
-                if not section_text.strip():
-                    continue
+            section_metadata = dict(base_metadata)
+            if section_heading:
+                section_metadata["section"] = section_heading
 
-                section_metadata = dict(base_metadata)
-                if chapter_heading:
-                    section_metadata["chapter"] = chapter_heading
-                if section_heading:
-                    section_metadata["section"] = section_heading
+            sub_chunks = self._inner_chunker.chunk(section_text, section_metadata)
+            all_chunks.extend(sub_chunks)
 
-                sub_chunks = self._inner_chunker.chunk(section_text, section_metadata)
-                all_chunks.extend(sub_chunks)
-
-        # each call to the inner chunker restarts chunk_index at 0 for its
-        # own section, so reindex once, globally, across the whole document
         for i, c in enumerate(all_chunks):
             c.metadata["chunk_index"] = i
 

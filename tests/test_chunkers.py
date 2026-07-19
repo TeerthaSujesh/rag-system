@@ -175,31 +175,28 @@ def test_semantic_metadata_is_independent_per_chunk():
 from ingestion.chunkers.hierarchical import HierarchicalChunker
 
 
-def test_hierarchical_attaches_chapter_and_section_metadata():
+def test_hierarchical_attaches_section_metadata():
     text = (
-        "Chapter 1: Statics\n\n"
-        "1.1 Introduction to Forces\n"
-        "A force is a push or pull acting on an object.\n\n"
-        "1.2 Newtons Laws\n"
-        "Newtons first law states an object at rest stays at rest.\n\n"
-        "Chapter 2: Dynamics\n\n"
-        "2.1 Motion Equations\n"
-        "The equations of motion describe how position changes over time.\n"
+        "Overview\n"
+        "This is the overview section with some content in it.\n\n"
+        "Core Data Types\n"
+        "This section covers int, float, and other basic types.\n"
     )
-    chunker = HierarchicalChunker(chunk_size=150, overlap=0)
-    chunks = chunker.chunk(text, base_metadata={"source": "mechanics.pdf"})
+    chunker = HierarchicalChunker(chunk_size=200, overlap=0)
+    chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
 
-    assert any(c.metadata.get("chapter") == "Chapter 1: Statics" for c in chunks)
-    assert any(c.metadata.get("chapter") == "Chapter 2: Dynamics" for c in chunks)
-    assert any(c.metadata.get("section") == "1.1 Introduction to Forces" for c in chunks)
+    assert any(c.metadata.get("section") == "Overview" for c in chunks)
+    assert any(c.metadata.get("section") == "Core Data Types" for c in chunks)
 
 
 def test_hierarchical_chunk_index_is_globally_sequential():
     text = (
-        "Chapter 1: A\n\n1.1 First\nSome content here for the first section.\n\n"
-        "Chapter 2: B\n\n2.1 Second\nSome content here for the second section.\n"
+        "First Section\n"
+        "Some content for the first section that is here.\n\n"
+        "Second Section\n"
+        "Some content for the second section that is here.\n"
     )
-    chunker = HierarchicalChunker(chunk_size=150, overlap=0)
+    chunker = HierarchicalChunker(chunk_size=100, overlap=0)
     chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
 
     indices = [c.metadata["chunk_index"] for c in chunks]
@@ -207,18 +204,17 @@ def test_hierarchical_chunk_index_is_globally_sequential():
 
 
 def test_hierarchical_falls_back_gracefully_with_no_headings():
-    text = "This document has no chapters or sections, just plain paragraphs of content."
+    text = "this is all lowercase content with no heading-shaped lines anywhere in it at all."
     chunker = HierarchicalChunker(chunk_size=100, overlap=0)
     chunks = chunker.chunk(text, base_metadata={"source": "notes.pdf"})
 
     assert len(chunks) >= 1
     for c in chunks:
-        assert c.metadata.get("chapter") is None
         assert c.metadata.get("section") is None
 
 
 def test_hierarchical_metadata_is_independent_per_chunk():
-    text = "Chapter 1: A\n\n1.1 First\nSome content for this section here.\n"
+    text = "First Section\nSome content for this section is here.\n"
     chunker = HierarchicalChunker(chunk_size=100, overlap=0)
     chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
 
