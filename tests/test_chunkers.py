@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pytest
 from ingestion.chunkers.semantic import SemanticChunker
 from ingestion.embeddings import embed_text
-
+from ingestion.chunkers.hierarchical import HierarchicalChunker
 from ingestion.chunkers.fixed_size import FixedSizeChunker
 from ingestion.chunkers.recursive import RecursiveChunker
 from ingestion.chunkers.sentence import SentenceChunker
@@ -169,4 +169,59 @@ def test_semantic_metadata_is_independent_per_chunk():
 
     if len(chunks) > 1:
         chunks[0].metadata["chunk_index"] = 999
+        assert chunks[1].metadata["chunk_index"] != 999
+
+
+from ingestion.chunkers.hierarchical import HierarchicalChunker
+
+
+def test_hierarchical_attaches_chapter_and_section_metadata():
+    text = (
+        "Chapter 1: Statics\n\n"
+        "1.1 Introduction to Forces\n"
+        "A force is a push or pull acting on an object.\n\n"
+        "1.2 Newtons Laws\n"
+        "Newtons first law states an object at rest stays at rest.\n\n"
+        "Chapter 2: Dynamics\n\n"
+        "2.1 Motion Equations\n"
+        "The equations of motion describe how position changes over time.\n"
+    )
+    chunker = HierarchicalChunker(chunk_size=150, overlap=0)
+    chunks = chunker.chunk(text, base_metadata={"source": "mechanics.pdf"})
+
+    assert any(c.metadata.get("chapter") == "Chapter 1: Statics" for c in chunks)
+    assert any(c.metadata.get("chapter") == "Chapter 2: Dynamics" for c in chunks)
+    assert any(c.metadata.get("section") == "1.1 Introduction to Forces" for c in chunks)
+
+
+def test_hierarchical_chunk_index_is_globally_sequential():
+    text = (
+        "Chapter 1: A\n\n1.1 First\nSome content here for the first section.\n\n"
+        "Chapter 2: B\n\n2.1 Second\nSome content here for the second section.\n"
+    )
+    chunker = HierarchicalChunker(chunk_size=150, overlap=0)
+    chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
+
+    indices = [c.metadata["chunk_index"] for c in chunks]
+    assert indices == list(range(len(chunks)))
+
+
+def test_hierarchical_falls_back_gracefully_with_no_headings():
+    text = "This document has no chapters or sections, just plain paragraphs of content."
+    chunker = HierarchicalChunker(chunk_size=100, overlap=0)
+    chunks = chunker.chunk(text, base_metadata={"source": "notes.pdf"})
+
+    assert len(chunks) >= 1
+    for c in chunks:
+        assert c.metadata.get("chapter") is None
+        assert c.metadata.get("section") is None
+
+
+def test_hierarchical_metadata_is_independent_per_chunk():
+    text = "Chapter 1: A\n\n1.1 First\nSome content for this section here.\n"
+    chunker = HierarchicalChunker(chunk_size=100, overlap=0)
+    chunks = chunker.chunk(text, base_metadata={"source": "test.pdf"})
+
+    chunks[0].metadata["chunk_index"] = 999
+    if len(chunks) > 1:
         assert chunks[1].metadata["chunk_index"] != 999
