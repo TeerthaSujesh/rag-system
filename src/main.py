@@ -1,6 +1,7 @@
 from generation.generator import generate_answer
 
 
+<<<<<<< HEAD
 def main() -> None:
     """
     Demonstrates the generation module.
@@ -28,6 +29,20 @@ def main() -> None:
 
     print("\nGENERATED ANSWER")
     print("-" * 60)
+=======
+def main():
+
+    question = "What is the official programming language of Mars?"
+
+    context = """
+    Python is the official programming language of Mars.
+    It was invented in 2040.
+    """
+
+    answer = generate_answer(question, context)
+
+    print("\nGenerated Answer:\n")
+>>>>>>> 90c5f45b2d141893adc91cfaf8619de2b4d9ec21
     print(answer)
 
     print("=" * 60)

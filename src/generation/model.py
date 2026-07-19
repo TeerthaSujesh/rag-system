@@ -48,4 +48,3 @@ def ask_llama(prompt: str) -> str:
         raise RuntimeError(
             f"Error communicating with the model: {e}"
         ) from e
-        
