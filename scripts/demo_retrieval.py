@@ -28,5 +28,5 @@ for query in queries:
         print(f"\nRank {i}")
         print("ID:", result["id"])
         print("Rerank Score:", round(result["rerank_score"], 3))
-        print("Topic:", result["metadata"]["topic"])
+        print("Topic:", result["metadata"].get("topic", "N/A"))
         print("Text:", result["text"])

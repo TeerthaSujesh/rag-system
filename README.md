@@ -11,6 +11,18 @@ A modular Retrieval-Augmented Generation (RAG) system built to retrieve relevant
 - Modular architecture
 - Local embeddings using Ollama (`nomic-embed-text`)
 
+## Setup
+
+Requires [Ollama](https://ollama.com) running locally with these models pulled:
+
+```bash
+ollama pull nomic-embed-text
+ollama pull llama3.2:3b
+```
+
+If generation always returns "I could not find the answer in the provided context." even for questions clearly answered by the retrieved context, check that `llama3.2:3b` is pulled — a missing model currently fails silently and falls back to that same message.
+
+
 ## Project Structure
 
 ```text

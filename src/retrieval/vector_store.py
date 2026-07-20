@@ -2,7 +2,7 @@ import chromadb
 
 
 class VectorStore:
-    def __init__(self, db_path="./chroma_db", collection_name="knowledge_base"):
+    def __init__(self, db_path="./data/chroma_db", collection_name="knowledge_base"):
         self.client = chromadb.PersistentClient(path=db_path)
 
         # Explicitly set cosine distance. ChromaDB defaults to Euclidean
