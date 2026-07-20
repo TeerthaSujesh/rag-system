@@ -1,18 +1,24 @@
+import json
+
+from retrieval.retriever import Retriever
 from generation.generator import generate_answer
 
 
-<<<<<<< HEAD
 def main() -> None:
     """
-    Demonstrates the generation module.
+    Runs the full RAG pipeline: retrieval + generation.
     """
 
-    contexts = [
-        "Python is the official programming language of Mars.",
-        "Python was invented in 2040.",
-    ]
+    with open("data/sample_contexts.json", "r") as f:
+        chunks = json.load(f)
 
-    question = "What is the official programming language of Mars?"
+    retriever = Retriever(chunks)
+
+    question = "How are functions defined in Python?"
+
+    retrieved_results = retriever.retrieve(question, top_k=5)
+
+    contexts = [result["text"] for result in retrieved_results]
 
     answer = generate_answer(question, contexts)
 
@@ -29,20 +35,6 @@ def main() -> None:
 
     print("\nGENERATED ANSWER")
     print("-" * 60)
-=======
-def main():
-
-    question = "What is the official programming language of Mars?"
-
-    context = """
-    Python is the official programming language of Mars.
-    It was invented in 2040.
-    """
-
-    answer = generate_answer(question, context)
-
-    print("\nGenerated Answer:\n")
->>>>>>> 90c5f45b2d141893adc91cfaf8619de2b4d9ec21
     print(answer)
 
     print("=" * 60)
