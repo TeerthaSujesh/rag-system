@@ -14,7 +14,7 @@ def main() -> None:
 
     retriever = Retriever(chunks)
 
-    question = "How are functions defined in Python?"
+    question = input("Enter your question: ")
 
     retrieved_results = retriever.retrieve(question, top_k=5)
 
