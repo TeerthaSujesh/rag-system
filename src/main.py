@@ -1,13 +1,43 @@
-from generation.model import ask_llama
+import json
+
+from retrieval.retriever import Retriever
+from generation.generator import generate_answer
 
 
-def main():
-    prompt = "Explain Python in one sentence."
+def main() -> None:
+    """
+    Runs the full RAG pipeline: retrieval + generation.
+    """
 
-    answer = ask_llama(prompt)
+    with open("data/sample_contexts.json", "r") as f:
+        chunks = json.load(f)
 
-    print("\nAnswer:\n")
+    retriever = Retriever(chunks)
+
+    question = input("Enter your question: ")
+
+    retrieved_results = retriever.retrieve(question, top_k=5)
+
+    contexts = [result["text"] for result in retrieved_results]
+
+    answer = generate_answer(question, contexts)
+
+    print("=" * 60)
+    print("QUESTION")
+    print("-" * 60)
+    print(question)
+
+    print("\nRETRIEVED CONTEXT")
+    print("-" * 60)
+
+    for context in contexts:
+        print(f"- {context}")
+
+    print("\nGENERATED ANSWER")
+    print("-" * 60)
     print(answer)
+
+    print("=" * 60)
 
 
 if __name__ == "__main__":

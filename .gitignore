@@ -1,24 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Virtual Environment
 .venv/
 venv/
 env/
 
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
+# Environment variables
+.env
+.env.*
+
+# ChromaDB
+chroma_db/
+data/chroma_db/
+
+# Python packaging
+*.egg-info/
+build/
+dist/
+.eggs/
 
 # VS Code
 .vscode/
-
-# Environment variables
-.env
 
 # macOS
 .DS_Store
 
 # Windows
-Thumbs.dbvenv/
+Thumbs.db
 
-# ChromaDB generated data
-data/chroma_db/
+# Logs
+*.log
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ruff / MyPy
+.mypy_cache/
+.ruff_cache/
+
+# IDEs
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
