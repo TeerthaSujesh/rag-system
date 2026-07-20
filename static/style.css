@@ -1,0 +1,245 @@
+:root {
+  --paper: #F1EFE7;
+  --card: #FBFAF6;
+  --ink: #1E2A2E;
+  --ink-soft: #5C6B6E;
+  --ink-faint: #8B968F;
+  --rule: #D8D3C4;
+  --accent: #2F6F62;
+  --accent-soft: #E4ECE9;
+  --amber: #C97A2B;
+  --amber-soft: #F3E2CC;
+  --error: #B3432E;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "IBM Plex Sans", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  height: 100vh;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.masthead {
+  padding: 40px 0 24px;
+  flex-shrink: 0;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 34px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.chat-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
+.turn {
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message-user {
+  align-self: flex-end;
+  max-width: 80%;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px;
+  border-radius: 14px 14px 2px 14px;
+}
+
+.message-user p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.message-assistant {
+  align-self: flex-start;
+  max-width: 100%;
+  width: 100%;
+  padding: 22px 24px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 2px 14px 14px 14px;
+}
+
+.answer-label {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.answer-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.answer-source {
+  margin: 14px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.composer {
+  flex-shrink: 0;
+  padding: 12px 0 28px;
+}
+
+.status-line {
+  min-height: 20px;
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.status-line.is-error {
+  color: var(--error);
+}
+
+.query-form {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.question-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--ink);
+  padding: 8px 4px;
+  outline: none;
+}
+
+.question-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.ask-button {
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ask-button:hover {
+  background: var(--accent);
+}
+
+.ask-button:focus-visible,
+.question-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ask-button:disabled {
+  background: var(--ink-faint);
+  cursor: default;
+}
+
+.empty-state {
+  margin-top: 24px;
+  padding: 32px 0;
+  border-top: 1px dashed var(--rule);
+  color: var(--ink-faint);
+}
+
+.empty-state p {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.empty-state-sub {
+  color: var(--ink-faint);
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 0 18px;
+  }
+  .masthead {
+    padding: 28px 0 16px;
+  }
+  .wordmark {
+    font-size: 26px;
+  }
+  .message-user {
+    max-width: 90%;
+  }
+  .query-form {
+    flex-direction: column;
+    gap: 12px;
+    border-bottom: none;
+  }
+  .question-input {
+    border-bottom: 2px solid var(--ink);
+  }
+  .ask-button {
+    height: 42px;
+  }
+}

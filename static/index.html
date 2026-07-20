@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAG System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Hybrid retrieval-augmented generation</p>
+    <h1 class="wordmark">Ask the knowledge base</h1>
+  </header>
+
+  <main class="chat-feed" id="chat-feed">
+    <section class="empty-state" id="empty-state">
+      <p>Nothing asked yet.</p>
+      <p class="empty-state-sub">Type a question below to search the ingested documents.</p>
+    </section>
+  </main>
+
+  <div class="composer">
+    <p class="status-line" id="status-line" aria-live="polite"></p>
+    <form id="query-form" class="query-form">
+      <input
+        id="question-input"
+        type="text"
+        class="question-input"
+        placeholder="How do I report a security incident?"
+        autocomplete="off"
+        required
+      />
+      <button type="submit" class="ask-button" id="ask-button">
+        Ask
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
