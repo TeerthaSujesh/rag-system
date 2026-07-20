@@ -45,6 +45,7 @@ def ask_llama(prompt: str) -> str:
         ) from None
 
     except Exception as e:
+        print(f"[generation] Model call failed: {e}")
         raise RuntimeError(
             f"Error communicating with the model: {e}"
         ) from e
