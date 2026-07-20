@@ -2,11 +2,16 @@ import chromadb
 
 
 class VectorStore:
-    def __init__(self, db_path="./chroma_db", collection_name="documents"):
+    def __init__(self, db_path="./chroma_db", collection_name="knowledge_base"):
         self.client = chromadb.PersistentClient(path=db_path)
 
+        # Explicitly set cosine distance. ChromaDB defaults to Euclidean
+        # (L2) distance, which silently produces wrong similarity rankings
+        # when your embeddings were designed/compared using cosine
+        # similarity (as nomic-embed-text's docs assume).
         self.collection = self.client.get_or_create_collection(
-            name=collection_name
+            name=collection_name,
+            metadata={"hnsw:space": "cosine"},
         )
 
     def search(self, embedding, top_k=20):
