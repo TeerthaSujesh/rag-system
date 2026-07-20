@@ -27,6 +27,7 @@ from pydantic import BaseModel
 
 from retrieval.retriever import Retriever
 from generation.generator import generate_answer
+from generation.memory import memory
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHROMA_PATH = PROJECT_ROOT / "data" / "chroma_db"
@@ -66,8 +67,8 @@ retriever = Retriever(chunks) if chunks else None
 
 
 class QuestionRequest(BaseModel):
+    session_id: str
     question: str
-
 
 @app.get("/api/health")
 def health():
@@ -85,21 +86,34 @@ def ask(request: QuestionRequest):
             ),
         )
 
+    session_id = request.session_id
     question = request.question.strip()
+
     if not question:
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
+    # Get previous conversation history
+    history = memory.get_history(session_id)
+
+    # Retrieve relevant chunks
     retrieved_results = retriever.retrieve(question, top_k=5)
     contexts = [chunk["text"] for chunk in retrieved_results]
-    answer = generate_answer(question, contexts)
+
+    # Generate answer (we'll use history in the next step)
+    answer = generate_answer(
+    question=question,
+    contexts=contexts,
+    history=history,
+)
+
+    # Save this conversation
+    memory.add_message(session_id, "user", question)
+    memory.add_message(session_id, "assistant", answer)
 
     return {
         "question": question,
         "answer": answer,
         "retrieved_contexts": contexts,
-        # kept alongside retrieved_contexts (not replacing it) so the
-        # frontend can still show rank/score/source per passage without
-        # changing the agreed contract's existing fields
         "retrieved_results": [
             {
                 "id": r["id"],
@@ -110,7 +124,6 @@ def ask(request: QuestionRequest):
             for r in retrieved_results
         ],
     }
-
 
 # Mounted last so it acts as a fallback for "/" and any non-API path,
 # without shadowing /ask and /api/health defined above.

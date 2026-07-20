@@ -3,9 +3,14 @@ from generation.prompts import STRICT_PROMPT
 from generation.formatter import format_response
 
 
-def generate_answer(question: str, contexts: list[str]) -> str:
+def generate_answer(
+    question: str,
+    contexts: list[str],
+    history: list[dict],
+) -> str:
     """
-    Generates an answer using only the retrieved contexts.
+    Generates an answer using the retrieved contexts
+    and previous conversation history.
     """
 
     if not contexts:
@@ -26,7 +31,10 @@ def generate_answer(question: str, contexts: list[str]) -> str:
     )
 
     try:
-        raw_response = ask_llama(prompt)
+        raw_response = ask_llama(
+            prompt=prompt,
+            history=history,
+        )
     except RuntimeError:
         return "I could not find the answer in the provided context."
 

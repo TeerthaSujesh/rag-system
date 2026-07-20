@@ -7,6 +7,12 @@ const emptyState = document.getElementById("empty-state");
 
 let turnCount = 0;
 
+// Generate a unique session ID once and reuse it
+const sessionId =
+  localStorage.getItem("session_id") || crypto.randomUUID();
+
+localStorage.setItem("session_id", sessionId);
+
 function setStatus(message, isError = false) {
   statusLine.textContent = message;
   statusLine.classList.toggle("is-error", isError);
@@ -38,11 +44,13 @@ function appendTurn(question, data) {
     <div class="message message-assistant">
       <p class="answer-label">Answer</p>
       <p class="answer-text">${escapeHtml(data.answer)}</p>
-      <p class="answer-source">${
-        data.retrieved_results.length > 0
-          ? `Source: ${escapeHtml(sourceLabel(data.retrieved_results[0].metadata))}`
-          : ""
-      }</p>
+      <p class="answer-source">
+        ${
+          data.retrieved_results.length > 0
+            ? `Source: ${escapeHtml(sourceLabel(data.retrieved_results[0].metadata))}`
+            : ""
+        }
+      </p>
     </div>
   `;
 
@@ -63,8 +71,13 @@ form.addEventListener("submit", async (event) => {
   try {
     const response = await fetch("/ask", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        question: question,
+      }),
     });
 
     if (!response.ok) {
